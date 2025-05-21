@@ -19,7 +19,6 @@ export async function parseOTPUri(
   try {
     // Check if it's a Google Authenticator migration URI
     if (uri.startsWith("otpauth-migration://offline?data=")) {
-      console.log("Detected Google Authenticator migration URI");
       return await parseMigrationURI(uri);
     }
 
@@ -60,13 +59,9 @@ export async function parseOTPUri(
           }
         } catch {
           // Not JSON
-          console.log("Not a JSON format");
         }
       }
     }
-
-    // For debugging purposes, log the URI we're trying to parse
-    console.log("Trying to parse URI:", parsedUri);
 
     // If we still couldn't parse into a valid otpauth URI, try one more approach
     if (!parsedUri.startsWith("otpauth://")) {

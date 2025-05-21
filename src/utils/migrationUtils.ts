@@ -2,6 +2,19 @@ import * as protobuf from "protobufjs";
 import * as base64js from "base64-js";
 import type { OTPInfo } from "./otpUtils";
 
+// Define interface for migration payload to avoid using 'any'
+interface MigrationPayloadObject {
+  otpParameters?: Array<{
+    secret: number[];
+    name?: string;
+    issuer?: string;
+    algorithm?: string;
+    digits?: string;
+    type?: string;
+    counter?: string;
+  }>;
+}
+
 // Define the protocol buffer structure for Google Authenticator's migration format
 const migrationProto = `
 syntax = "proto3";
@@ -115,9 +128,7 @@ export async function parseMigrationURI(uri: string): Promise<OTPInfo[]> {
       longs: String,
       enums: String,
       bytes: Array,
-    }) as any;
-
-    console.log("Decoded migration payload:", payload);
+    }) as MigrationPayloadObject;
 
     // Convert each OTP parameter to our OTPInfo format
     const result: OTPInfo[] = [];
