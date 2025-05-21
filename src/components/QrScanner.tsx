@@ -11,6 +11,20 @@ interface QrScannerProps {
   onScanError?: (error: string) => void;
 }
 
+interface BoundingBox {
+  topLeft: { x: number; y: number };
+  topRight: { x: number; y: number };
+  bottomLeft: { x: number; y: number };
+  bottomRight: { x: number; y: number };
+  text: string;
+}
+
+// Point type with x,y coordinates
+interface Point {
+  x: number;
+  y: number;
+}
+
 const QrScanner: React.FC<QrScannerProps> = ({
   onScanSuccess,
   onScanError,
@@ -21,9 +35,12 @@ const QrScanner: React.FC<QrScannerProps> = ({
     []
   );
   const [statusMessage, setStatusMessage] = useState<string>("");
+  const [boundingBox, setBoundingBox] = useState<BoundingBox | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
+  const videoContainerRef = useRef<HTMLDivElement>(null);
   const readerRef = useRef<BrowserMultiFormatReader | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
 
   // Initialize the scanner
   useEffect(() => {
@@ -63,6 +80,9 @@ const QrScanner: React.FC<QrScannerProps> = ({
       if (readerRef.current) {
         readerRef.current.reset();
       }
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
     };
   }, [onScanError]);
 
@@ -76,8 +96,48 @@ const QrScanner: React.FC<QrScannerProps> = ({
           if (result) {
             setStatusMessage("QR code detected!");
             onScanSuccess(result.getText());
-            // Keep scanning running - uncomment the following line to stop after first detection
-            // stopScanner();
+
+            // Get position of QR code in the image
+            const points = result.getResultPoints();
+            if (points && points.length >= 3 && videoRef.current) {
+              // Get video dimensions
+              const videoWidth = videoRef.current.videoWidth;
+              const videoHeight = videoRef.current.videoHeight;
+              const displayWidth = videoRef.current.offsetWidth;
+              const displayHeight = videoRef.current.offsetHeight;
+
+              // Calculate scale factors
+              const scaleX = displayWidth / videoWidth;
+              const scaleY = displayHeight / videoHeight;
+
+              // Map points from original image to displayed size
+              const mappedPoints: Point[] = points.map((point) => ({
+                x: point.getX() * scaleX,
+                y: point.getY() * scaleY,
+              }));
+
+              // Create safe points with defaults if missing
+              const safePoints: Point[] = [
+                mappedPoints[0] || { x: 0, y: 100 }, // Bottom left
+                mappedPoints[1] || { x: 0, y: 0 }, // Top left
+                mappedPoints[2] || { x: 100, y: 0 }, // Top right
+                mappedPoints[3] || { x: 100, y: 100 }, // Bottom right
+              ];
+
+              // Create bounding box from points
+              setBoundingBox({
+                bottomLeft: safePoints[0],
+                topLeft: safePoints[1],
+                topRight: safePoints[2],
+                bottomRight: safePoints[3],
+                text: result.getText(),
+              });
+
+              // Automatically clear bounding box after 2 seconds
+              setTimeout(() => {
+                setBoundingBox(null);
+              }, 2000);
+            }
           }
           if (
             error &&
@@ -97,12 +157,14 @@ const QrScanner: React.FC<QrScannerProps> = ({
     } else if (!scanning && readerRef.current) {
       readerRef.current.reset();
       setStatusMessage("");
+      setBoundingBox(null);
     }
 
     return () => {
       if (readerRef.current) {
         readerRef.current.reset();
       }
+      setBoundingBox(null);
     };
   }, [scanning, deviceId, onScanSuccess, onScanError]);
 
@@ -117,6 +179,7 @@ const QrScanner: React.FC<QrScannerProps> = ({
     }
     setScanning(false);
     setStatusMessage("");
+    setBoundingBox(null);
   };
 
   const changeCamera = () => {
@@ -150,14 +213,50 @@ const QrScanner: React.FC<QrScannerProps> = ({
 
       {scanning && (
         <div className="reader-container">
-          <video
-            ref={videoRef}
+          <div
+            ref={videoContainerRef}
+            className="video-container"
             style={{
+              position: "relative",
               width: "100%",
               maxWidth: "800px",
-              borderRadius: "12px",
             }}
-          />
+          >
+            <video
+              ref={videoRef}
+              style={{
+                width: "100%",
+                borderRadius: "12px",
+              }}
+            />
+
+            {boundingBox && (
+              <div className="qr-bounding-box">
+                <svg
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    pointerEvents: "none",
+                  }}
+                >
+                  <polygon
+                    points={`
+                      ${boundingBox.topLeft.x},${boundingBox.topLeft.y} 
+                      ${boundingBox.topRight.x},${boundingBox.topRight.y}
+                      ${boundingBox.bottomRight.x},${boundingBox.bottomRight.y} 
+                      ${boundingBox.bottomLeft.x},${boundingBox.bottomLeft.y}
+                    `}
+                    fill="rgba(77, 124, 254, 0.3)"
+                    stroke="#4d7cfe"
+                    strokeWidth="4"
+                  />
+                </svg>
+              </div>
+            )}
+          </div>
 
           <p className="scanner-instruction">
             Position QR code in front of camera

@@ -250,3 +250,52 @@ h1 {
   word-break: break-word;
   text-align: left;
 }
+
+.video-container {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  height: auto;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 12px;
+  background-color: #1a1a1a;
+}
+
+.scanner-video {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  object-fit: cover;
+  display: block;
+}
+
+.qr-bounding-box {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Add a pulsing animation to the QR bounding box */
+@keyframes pulse {
+  0% {
+    stroke-width: 2;
+    stroke-opacity: 1;
+  }
+  50% {
+    stroke-width: 4;
+    stroke-opacity: 0.8;
+  }
+  100% {
+    stroke-width: 2;
+    stroke-opacity: 1;
+  }
+}
+
+.qr-bounding-box svg polygon {
+  animation: pulse 1.5s infinite;
+}
