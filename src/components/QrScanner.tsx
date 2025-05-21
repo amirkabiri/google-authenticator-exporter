@@ -37,6 +37,8 @@ const QrScanner: React.FC<QrScannerProps> = ({
   const [statusMessage, setStatusMessage] = useState<string>("");
   const [boundingBox, setBoundingBox] = useState<BoundingBox | null>(null);
   const [isScanning, setIsScanning] = useState<boolean>(false);
+  const [permissionRequested, setPermissionRequested] =
+    useState<boolean>(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
@@ -53,45 +55,6 @@ const QrScanner: React.FC<QrScannerProps> = ({
     const codeReader = new BrowserMultiFormatReader(hints);
     readerRef.current = codeReader;
 
-    // Check if mediaDevices is supported
-    if (!navigator.mediaDevices) {
-      setStatusMessage("Camera access is not supported in your browser.");
-      if (onScanError) onScanError("Camera API not supported");
-      return;
-    }
-
-    // Explicitly request camera permission
-    navigator.mediaDevices
-      .getUserMedia({ video: true })
-      .then((stream) => {
-        // Release the stream immediately - we just want to trigger the permission prompt
-        stream.getTracks().forEach((track) => track.stop());
-
-        // Now list available devices
-        return BrowserCodeReader.listVideoInputDevices();
-      })
-      .then((devices) => {
-        setAvailableDevices(devices);
-        if (devices.length > 0) {
-          // Prefer rear camera if available
-          const backCamera = devices.find((device) =>
-            /back|rear|environment/i.test(device.label)
-          );
-          setDeviceId(backCamera ? backCamera.deviceId : devices[0].deviceId);
-          setStatusMessage(
-            `Found ${devices.length} camera(s). ` +
-              (backCamera ? "Using rear camera." : "Using default camera.")
-          );
-        } else {
-          setStatusMessage("No cameras found.");
-        }
-      })
-      .catch((err) => {
-        console.error("Camera access error:", err);
-        setStatusMessage(`Error accessing camera: ${err.message}`);
-        if (onScanError) onScanError(`Failed to access camera: ${err.message}`);
-      });
-
     // Clean up
     return () => {
       if (readerRef.current) {
@@ -101,7 +64,7 @@ const QrScanner: React.FC<QrScannerProps> = ({
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [onScanError]);
+  }, []);
 
   // Start/stop scanning based on scanning state
   useEffect(() => {
@@ -218,8 +181,55 @@ const QrScanner: React.FC<QrScannerProps> = ({
   }, [scanning, deviceId, onScanSuccess, onScanError, isScanning]);
 
   const startScanner = () => {
-    setScanning(true);
     setStatusMessage("Initializing camera...");
+
+    // Check if mediaDevices is supported
+    if (!navigator.mediaDevices) {
+      setStatusMessage("Camera access is not supported in your browser.");
+      if (onScanError) onScanError("Camera API not supported");
+      return;
+    }
+
+    // Request camera permission only when user clicks the button
+    if (!permissionRequested) {
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then((stream) => {
+          // Release the stream immediately - we just want to trigger the permission prompt
+          stream.getTracks().forEach((track) => track.stop());
+          setPermissionRequested(true);
+
+          // Now list available devices
+          return BrowserCodeReader.listVideoInputDevices();
+        })
+        .then((devices) => {
+          setAvailableDevices(devices);
+          if (devices.length > 0) {
+            // Prefer rear camera if available
+            const backCamera = devices.find((device) =>
+              /back|rear|environment/i.test(device.label)
+            );
+            setDeviceId(backCamera ? backCamera.deviceId : devices[0].deviceId);
+            setStatusMessage(
+              `Found ${devices.length} camera(s). ` +
+                (backCamera ? "Using rear camera." : "Using default camera.")
+            );
+            // Now that we have a device ID, set scanning to true to start the camera
+            setScanning(true);
+          } else {
+            setStatusMessage("No cameras found.");
+          }
+        })
+        .catch((err) => {
+          console.error("Camera access error:", err);
+          setStatusMessage(`Error accessing camera: ${err.message}`);
+          if (onScanError)
+            onScanError(`Failed to access camera: ${err.message}`);
+        });
+    } else {
+      // If permission was already requested, just start scanning
+      setScanning(true);
+    }
   };
 
   const stopScanner = () => {
@@ -248,7 +258,7 @@ const QrScanner: React.FC<QrScannerProps> = ({
       );
       // Restart scanner with new camera
       setTimeout(() => {
-        startScanner();
+        setScanning(true);
       }, 500);
     }
   };
