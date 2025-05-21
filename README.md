@@ -1,7 +1,7 @@
 # Google Authenticator Exporter
 
 <div align="center">
-  <img src="screenshots/1.jpg" alt="Google Authenticator Exporter" width="400">
+  <img src="https://raw.githubusercontent.com/amirkabiri/google-authenticator-exporter/main/screenshots/1.jpg" alt="Google Authenticator Exporter" width="400">
 </div>
 
 A powerful, user-friendly web application that allows you to scan, decode, and export Google Authenticator QR codes. This tool is perfect for migrating your 2FA tokens between devices or creating backups of your authentication secrets.
@@ -19,10 +19,10 @@ A powerful, user-friendly web application that allows you to scan, decode, and e
 ## 📸 Screenshots
 
 <div align="center">
-  <img src="screenshots/1.jpg" alt="Main Interface" width="400">
+  <img src="https://raw.githubusercontent.com/amirkabiri/google-authenticator-exporter/main/screenshots/1.jpg" alt="Main Interface" width="400">
   <p><em>Main interface showing a scanned authentication token</em></p>
   
-  <img src="screenshots/2.jpg" alt="Account Selection" width="400">
+  <img src="https://raw.githubusercontent.com/amirkabiri/google-authenticator-exporter/main/screenshots/2.jpg" alt="Account Selection" width="400">
   <p><em>Multiple account selection from migration QR code</em></p>
 </div>
 
