@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Authenticator Exporter</title>
+    <script>
+        // Redirect to the homepage with the correct path
+        const path = window.location.pathname;
+        const repoName = '/google-authentictor-exporter/';
+
+        // Strip the repo name from the path if present
+        const pathWithoutRepo = path.startsWith(repoName)
+            ? path.substr(repoName.length)
+            : path;
+
+        // Redirect to the index page with the path as a query parameter
+        window.location.replace(`${repoName}?path=${pathWithoutRepo}`);
+    </script>
+</head>
+
+<body>
+    <p>Redirecting...</p>
+</body>
+
+</html>

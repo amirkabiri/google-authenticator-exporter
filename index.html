@@ -1,13 +1,34 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A tool to scan, read, and export Google Authenticator QR codes" />
+  <title>Google Authenticator Exporter</title>
+  <script>
+    // Handle redirects from 404.html
+    (function () {
+      const query = window.location.search;
+      const params = new URLSearchParams(query);
+      const path = params.get('path');
+
+      if (path) {
+        // Remove the query parameter
+        window.history.replaceState(null, null,
+          window.location.pathname.replace(/\/$/, "") +
+          (path === "/" ? "" : path) +
+          window.location.hash
+        );
+      }
+    })();
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>
