@@ -7,7 +7,7 @@ import {
 import { BrowserCodeReader } from "@zxing/browser";
 
 interface QrScannerProps {
-  onScanSuccess: (decodedText: string) => void;
+  onScanSuccess: (decodedText: string) => Promise<void>;
   onScanError?: (error: string) => void;
 }
 
@@ -36,6 +36,7 @@ const QrScanner: React.FC<QrScannerProps> = ({
   );
   const [statusMessage, setStatusMessage] = useState<string>("");
   const [boundingBox, setBoundingBox] = useState<BoundingBox | null>(null);
+  const [isScanning, setIsScanning] = useState<boolean>(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
@@ -92,79 +93,103 @@ const QrScanner: React.FC<QrScannerProps> = ({
       setStatusMessage("Starting camera...");
 
       readerRef.current
-        .decodeFromVideoDevice(deviceId, videoRef.current, (result, error) => {
-          if (result) {
-            setStatusMessage("QR code detected! Closing camera...");
+        .decodeFromVideoDevice(
+          deviceId,
+          videoRef.current,
+          async (result, error) => {
+            if (result && !isScanning) {
+              setIsScanning(true);
+              setStatusMessage("QR code detected! Processing...");
 
-            // Get position of QR code in the image
-            const points = result.getResultPoints();
-            if (points && points.length >= 3 && videoRef.current) {
-              // Get video dimensions
-              const videoWidth = videoRef.current.videoWidth;
-              const videoHeight = videoRef.current.videoHeight;
-              const displayWidth = videoRef.current.offsetWidth;
-              const displayHeight = videoRef.current.offsetHeight;
+              // Get position of QR code in the image
+              const points = result.getResultPoints();
+              if (points && points.length >= 3 && videoRef.current) {
+                // Get video dimensions
+                const videoWidth = videoRef.current.videoWidth;
+                const videoHeight = videoRef.current.videoHeight;
+                const displayWidth = videoRef.current.offsetWidth;
+                const displayHeight = videoRef.current.offsetHeight;
 
-              // Calculate scale factors
-              const scaleX = displayWidth / videoWidth;
-              const scaleY = displayHeight / videoHeight;
+                // Calculate scale factors
+                const scaleX = displayWidth / videoWidth;
+                const scaleY = displayHeight / videoHeight;
 
-              // Map points from original image to displayed size
-              const mappedPoints: Point[] = points.map((point) => ({
-                x: point.getX() * scaleX,
-                y: point.getY() * scaleY,
-              }));
+                // Map points from original image to displayed size
+                const mappedPoints: Point[] = points.map((point) => ({
+                  x: point.getX() * scaleX,
+                  y: point.getY() * scaleY,
+                }));
 
-              // Create safe points with defaults if missing
-              const safePoints: Point[] = [
-                mappedPoints[0] || { x: 0, y: 100 }, // Bottom left
-                mappedPoints[1] || { x: 0, y: 0 }, // Top left
-                mappedPoints[2] || { x: 100, y: 0 }, // Top right
-                mappedPoints[3] || { x: 100, y: 100 }, // Bottom right
-              ];
+                // Create safe points with defaults if missing
+                const safePoints: Point[] = [
+                  mappedPoints[0] || { x: 0, y: 100 }, // Bottom left
+                  mappedPoints[1] || { x: 0, y: 0 }, // Top left
+                  mappedPoints[2] || { x: 100, y: 0 }, // Top right
+                  mappedPoints[3] || { x: 100, y: 100 }, // Bottom right
+                ];
 
-              // Create bounding box from points
-              setBoundingBox({
-                bottomLeft: safePoints[0],
-                topLeft: safePoints[1],
-                topRight: safePoints[2],
-                bottomRight: safePoints[3],
-                text: result.getText(),
-              });
+                // Create bounding box from points
+                setBoundingBox({
+                  bottomLeft: safePoints[0],
+                  topLeft: safePoints[1],
+                  topRight: safePoints[2],
+                  bottomRight: safePoints[3],
+                  text: result.getText(),
+                });
 
-              // Process the result
-              onScanSuccess(result.getText());
-
-              // Show bounding box briefly, then close the scanner
-              setTimeout(() => {
-                setBoundingBox(null);
-                stopScanner();
-              }, 1000);
-            } else {
-              // No points available, still process the result and close
-              onScanSuccess(result.getText());
-              stopScanner();
+                try {
+                  // Process the result - this might take time for Google Auth migration codes
+                  await onScanSuccess(result.getText());
+                } catch (err) {
+                  console.error("Error processing scan result:", err);
+                  if (onScanError)
+                    onScanError(
+                      `Error processing scan: ${
+                        err instanceof Error ? err.message : "Unknown error"
+                      }`
+                    );
+                } finally {
+                  setIsScanning(false);
+                }
+              } else {
+                // No points available, still process the result
+                try {
+                  await onScanSuccess(result.getText());
+                } catch (err) {
+                  console.error("Error processing scan result:", err);
+                  if (onScanError)
+                    onScanError(
+                      `Error processing scan: ${
+                        err instanceof Error ? err.message : "Unknown error"
+                      }`
+                    );
+                } finally {
+                  setIsScanning(false);
+                }
+              }
+            }
+            if (
+              error &&
+              !error.message.includes(
+                "No MultiFormat Readers were able to detect"
+              )
+            ) {
+              setStatusMessage(`Scanning error: ${error.message}`);
+              if (onScanError) onScanError(error.message);
             }
           }
-          if (
-            error &&
-            !error.message.includes(
-              "No MultiFormat Readers were able to detect"
-            )
-          ) {
-            setStatusMessage(`Scanning error: ${error.message}`);
-            if (onScanError) onScanError(error.message);
-          }
-        })
+        )
         .catch((err) => {
           setStatusMessage(`Failed to start camera: ${err.message}`);
           if (onScanError) onScanError(`Camera error: ${err.message}`);
           setScanning(false);
+          setIsScanning(false);
         });
     } else if (!scanning && readerRef.current) {
       readerRef.current.reset();
       setStatusMessage("");
       setBoundingBox(null);
+      setIsScanning(false);
     }
 
     return () => {
@@ -172,8 +197,9 @@ const QrScanner: React.FC<QrScannerProps> = ({
         readerRef.current.reset();
       }
       setBoundingBox(null);
+      setIsScanning(false);
     };
-  }, [scanning, deviceId, onScanSuccess, onScanError]);
+  }, [scanning, deviceId, onScanSuccess, onScanError, isScanning]);
 
   const startScanner = () => {
     setScanning(true);
@@ -200,7 +226,9 @@ const QrScanner: React.FC<QrScannerProps> = ({
       const nextIndex = (currentIndex + 1) % availableDevices.length;
       setDeviceId(availableDevices[nextIndex].deviceId);
       setStatusMessage(
-        `Switched to camera: ${availableDevices[nextIndex].label || "Unnamed camera"}`
+        `Switched to camera: ${
+          availableDevices[nextIndex].label || "Unnamed camera"
+        }`
       );
       // Restart scanner with new camera
       setTimeout(() => {

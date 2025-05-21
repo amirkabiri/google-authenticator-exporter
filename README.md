@@ -52,3 +52,76 @@ export default tseslint.config({
   },
 })
 ```
+
+# Google Authenticator Exporter
+
+A tool to scan, read, and export Google Authenticator QR codes.
+
+## Features
+
+- Scan QR codes from Google Authenticator's export screen
+- **Support for both standard OTP URIs and Google's migration QR codes**
+- Parse TOTP (Time-based One-Time Password) and HOTP (HMAC-based One-Time Password) URIs
+- Display real-time TOTP codes with countdown timer
+- Export authentication data as JSON
+- Generate QR codes for importing into other authenticator apps
+- **Multi-account support for migration QR codes**
+- Full details display with secret key, algorithm, period, etc.
+- Copy functions for codes and secrets
+
+## Migration QR Support
+
+This tool can parse the special migration QR codes that Google Authenticator displays when you use the "Export accounts" or "Transfer accounts" feature. These QR codes contain multiple accounts in a proprietary format, which this tool can decode.
+
+When scanning a migration QR code:
+1. All accounts in the QR code will be detected and listed
+2. You can switch between accounts to view their details
+3. You can export all accounts at once with the "Export All Accounts as JSON" button
+4. Individual accounts can be exported as standalone QR codes or JSON files
+
+## Usage
+
+1. Install dependencies:
+   ```
+   bun install
+   ```
+
+2. Start the development server:
+   ```
+   bun dev
+   ```
+
+3. Open Google Authenticator on your device and export an account or use the "Transfer accounts" feature
+4. Allow camera access in your browser
+5. Scan the QR code displayed by Google Authenticator
+6. View the parsed information and export as needed
+
+## Technology
+
+- React with TypeScript
+- Vite for build tooling
+- ZXing library for QR code scanning
+- OTPAuth for handling TOTP/HOTP codes
+- QRCode.js for generating QR codes
+- Protocol Buffers for parsing Google's migration format
+
+## Development
+
+This project is built with Vite and React. To contribute:
+
+1. Fork the repository
+2. Clone your fork
+3. Install dependencies with `bun install`
+4. Start the dev server with `bun dev`
+5. Make your changes
+6. Submit a pull request
+
+## Privacy and Security
+
+- All processing happens directly in your browser
+- No data is sent to any servers
+- Consider using this tool offline for sensitive 2FA codes
+
+## License
+
+MIT

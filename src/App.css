@@ -334,3 +334,410 @@ h1 {
 .copy-button:active {
   background-color: #1d4ed8;
 }
+
+/* OTP-specific styles */
+.auth-result {
+  background-color: #1a1a2e;
+  border: 1px solid #2a2a5a;
+}
+
+.otp-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #374151;
+}
+
+.otp-issuer {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #f3f4f6;
+  margin-bottom: 0.25rem;
+}
+
+.otp-account {
+  font-size: 0.95rem;
+  color: #9ca3af;
+}
+
+.otp-code-container {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background-color: #0f172a;
+  border-radius: 0.5rem;
+  border: 1px solid #1e293b;
+}
+
+.otp-code {
+  font-family: "Courier New", monospace;
+  font-size: 2.25rem;
+  letter-spacing: 0.25rem;
+  color: #10b981;
+  margin-bottom: 0.75rem;
+  text-align: center;
+  font-weight: bold;
+}
+
+.otp-timer {
+  position: relative;
+  height: 6px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  margin: 1rem 0;
+}
+
+.timer-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 3px;
+  transition: width 1s linear;
+}
+
+.otp-timer span {
+  position: absolute;
+  right: 0;
+  top: -18px;
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.otp-details {
+  margin-top: 1.5rem;
+  text-align: left;
+}
+
+.otp-detail-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #374151;
+}
+
+.detail-label {
+  flex: 0 0 25%;
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
+
+.detail-value {
+  flex: 1;
+  color: #f3f4f6;
+  font-family: monospace;
+  font-size: 0.95rem;
+  word-break: break-all;
+}
+
+.secret-row {
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  flex-wrap: wrap;
+  border-bottom: none;
+}
+
+.secret-value {
+  letter-spacing: 0.1rem;
+  padding: 0.25rem 0;
+}
+
+.secret-copy-button,
+.otp-copy-button {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  margin-left: auto;
+}
+
+.secret-copy-button {
+  background-color: #2563eb;
+  margin-left: 0.5rem;
+}
+
+.otp-copy-button {
+  display: block;
+  margin: 1rem auto 0;
+  background-color: #059669;
+}
+
+.otp-copy-button:hover {
+  background-color: #047857;
+}
+
+.secret-copy-button:hover {
+  background-color: #1d4ed8;
+}
+
+/* Mobile responsiveness for OTP */
+@media (max-width: 600px) {
+  .otp-code {
+    font-size: 1.75rem;
+  }
+
+  .detail-label {
+    flex: 0 0 35%;
+  }
+
+  .secret-copy-button {
+    margin-top: 0.5rem;
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .secret-row {
+    padding: 0.75rem;
+  }
+}
+
+/* Add a pulsing animation for the OTP code */
+@keyframes otp-pulse {
+  0% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.8;
+  }
+}
+
+.otp-code {
+  animation: otp-pulse 2s infinite;
+}
+
+/* Export functionality styles */
+.export-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.export-button {
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.json-button {
+  background-color: #7c3aed;
+  color: white;
+}
+
+.json-button:hover {
+  background-color: #6d28d9;
+}
+
+.qr-button {
+  background-color: #0891b2;
+  color: white;
+}
+
+.qr-button:hover {
+  background-color: #0e7490;
+}
+
+/* QR Code Modal Styles */
+.qr-code-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.qr-code-content {
+  background-color: #1f2937;
+  padding: 2rem;
+  border-radius: 0.75rem;
+  max-width: 90%;
+  width: 400px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  position: relative;
+  border: 1px solid #374151;
+}
+
+.qr-close-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  font-size: 1.5rem;
+  cursor: pointer;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.qr-close-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #f3f4f6;
+}
+
+.qr-code-image-container {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background-color: white;
+  border-radius: 0.5rem;
+  display: inline-block;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.qr-code-image {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.qr-code-content h3 {
+  color: #f9fafb;
+  margin-top: 0;
+  font-size: 1.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.qr-code-instruction {
+  color: #9ca3af;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.download-button {
+  background-color: #10b981;
+  margin: 0 auto;
+  display: block;
+}
+
+.download-button:hover {
+  background-color: #059669;
+}
+
+/* Error message styles */
+.error-message {
+  margin: 1rem 0;
+  padding: 1rem;
+  background-color: rgba(239, 68, 68, 0.1);
+  border-left: 4px solid #ef4444;
+  border-radius: 0.25rem;
+  color: #fecaca;
+}
+
+.error-message p {
+  margin: 0;
+  font-size: 0.95rem;
+  font-family: monospace;
+}
+
+/* Account selection styles */
+.otp-selector {
+  margin: 1.5rem 0;
+  padding: 1.5rem;
+  background-color: #1a1a2e;
+  border-radius: 0.5rem;
+  border: 1px solid #2a2a5a;
+}
+
+.otp-selector h2 {
+  color: #f9fafb;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+}
+
+.account-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.account-item {
+  padding: 1rem;
+  background-color: #0f172a;
+  border-radius: 0.5rem;
+  border: 1px solid #1e293b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.account-item:hover {
+  background-color: #1e293b;
+}
+
+.account-item.selected {
+  background-color: #1e40af;
+  border-color: #3b82f6;
+}
+
+.account-issuer {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #f3f4f6;
+  margin-bottom: 0.25rem;
+}
+
+.account-name {
+  font-size: 0.875rem;
+  color: #9ca3af;
+}
+
+.export-all-container {
+  margin: 1.5rem 0;
+  text-align: center;
+}
+
+.export-all-button {
+  background-color: #7c3aed;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.export-all-button:hover {
+  background-color: #6d28d9;
+}
+
+.scan-again-button {
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-bottom: 1rem;
+}
+
+.scan-again-button:hover {
+  background-color: #4338ca;
+}
