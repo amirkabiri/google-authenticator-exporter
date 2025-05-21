@@ -168,19 +168,33 @@ h1 {
 .result-container {
   margin-top: 2rem;
   padding: 1.5rem;
-  background-color: #f3f4f6;
+  background-color: #1f2937;
   border-radius: 0.5rem;
+  border: 1px solid #374151;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.result-container h2 {
+  color: #f9fafb;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
 }
 
 .result-text {
   font-family: monospace;
-  background-color: #1f2937;
-  color: #f9fafb;
+  background-color: #111827;
+  color: #10b981;
   padding: 1rem;
   border-radius: 0.25rem;
   overflow-wrap: break-word;
   word-break: break-all;
   text-align: left;
+  border: 1px solid #374151;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  max-height: 300px;
+  overflow-y: auto;
 }
 
 .rescan-button {
@@ -298,4 +312,25 @@ h1 {
 
 .qr-bounding-box svg polygon {
   animation: pulse 1.5s infinite;
+}
+
+.copy-button {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 1rem;
+}
+
+.copy-button:hover {
+  background-color: #2563eb;
+}
+
+.copy-button:active {
+  background-color: #1d4ed8;
 }

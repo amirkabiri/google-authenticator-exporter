@@ -25,7 +25,18 @@ function App() {
       {scannedResult && (
         <div className="result-container">
           <h2>Scanned Result:</h2>
-          <p className="result-text">{scannedResult}</p>
+          <div className="result-text">{scannedResult}</div>
+          <button
+            className="copy-button"
+            onClick={() => {
+              navigator.clipboard
+                .writeText(scannedResult)
+                .then(() => alert("Copied to clipboard!"))
+                .catch((err) => console.error("Failed to copy: ", err));
+            }}
+          >
+            Copy to Clipboard
+          </button>
         </div>
       )}
     </div>
