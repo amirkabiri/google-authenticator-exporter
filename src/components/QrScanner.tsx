@@ -53,8 +53,23 @@ const QrScanner: React.FC<QrScannerProps> = ({
     const codeReader = new BrowserMultiFormatReader(hints);
     readerRef.current = codeReader;
 
-    // Get available video devices
-    BrowserCodeReader.listVideoInputDevices()
+    // Check if mediaDevices is supported
+    if (!navigator.mediaDevices) {
+      setStatusMessage("Camera access is not supported in your browser.");
+      if (onScanError) onScanError("Camera API not supported");
+      return;
+    }
+
+    // Explicitly request camera permission
+    navigator.mediaDevices
+      .getUserMedia({ video: true })
+      .then((stream) => {
+        // Release the stream immediately - we just want to trigger the permission prompt
+        stream.getTracks().forEach((track) => track.stop());
+
+        // Now list available devices
+        return BrowserCodeReader.listVideoInputDevices();
+      })
       .then((devices) => {
         setAvailableDevices(devices);
         if (devices.length > 0) {
@@ -72,8 +87,9 @@ const QrScanner: React.FC<QrScannerProps> = ({
         }
       })
       .catch((err) => {
-        setStatusMessage(`Error listing cameras: ${err.message}`);
-        if (onScanError) onScanError(`Failed to list cameras: ${err.message}`);
+        console.error("Camera access error:", err);
+        setStatusMessage(`Error accessing camera: ${err.message}`);
+        if (onScanError) onScanError(`Failed to access camera: ${err.message}`);
       });
 
     // Clean up
