@@ -94,8 +94,7 @@ const QrScanner: React.FC<QrScannerProps> = ({
       readerRef.current
         .decodeFromVideoDevice(deviceId, videoRef.current, (result, error) => {
           if (result) {
-            setStatusMessage("QR code detected!");
-            onScanSuccess(result.getText());
+            setStatusMessage("QR code detected! Closing camera...");
 
             // Get position of QR code in the image
             const points = result.getResultPoints();
@@ -133,10 +132,18 @@ const QrScanner: React.FC<QrScannerProps> = ({
                 text: result.getText(),
               });
 
-              // Automatically clear bounding box after 2 seconds
+              // Process the result
+              onScanSuccess(result.getText());
+
+              // Show bounding box briefly, then close the scanner
               setTimeout(() => {
                 setBoundingBox(null);
-              }, 2000);
+                stopScanner();
+              }, 1000);
+            } else {
+              // No points available, still process the result and close
+              onScanSuccess(result.getText());
+              stopScanner();
             }
           }
           if (
