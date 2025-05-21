@@ -193,7 +193,9 @@ function App() {
 
           {selectedOtpInfo.type === "totp" && otpCode && (
             <div className="otp-code-container">
-              <div className="otp-code">{otpCode}</div>
+              <div className="otp-code">
+                {otpCode.match(/.{1,3}/g)?.join(" ")}
+              </div>
               <div className="otp-timer">
                 <div
                   className="timer-bar"

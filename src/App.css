@@ -1,7 +1,7 @@
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1rem;
   text-align: center;
 }
 
@@ -44,13 +44,13 @@
 .app-container {
   max-width: 800px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1rem;
   text-align: center;
 }
 
 h1 {
   font-size: 2.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .qr-scanner {
@@ -319,12 +319,14 @@ h1 {
   color: white;
   border: none;
   border-radius: 0.5rem;
-  padding: 0.6rem 1.2rem;
-  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.3s;
-  margin-top: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .copy-button:hover {
@@ -361,20 +363,19 @@ h1 {
 
 .otp-code-container {
   margin: 1.5rem 0;
-  padding: 1rem;
-  background-color: #0f172a;
+  padding: 1rem 1.5rem;
+  background-color: #111827;
   border-radius: 0.5rem;
-  border: 1px solid #1e293b;
+  border: 1px solid #374151;
 }
 
 .otp-code {
-  font-family: "Courier New", monospace;
-  font-size: 2.25rem;
-  letter-spacing: 0.25rem;
+  font-family: "Roboto Mono", monospace, "Courier New", Courier;
+  font-size: 2.5rem;
+  font-weight: 600;
   color: #10b981;
-  margin-bottom: 0.75rem;
-  text-align: center;
-  font-weight: bold;
+  letter-spacing: 0.15rem;
+  margin-bottom: 1rem;
 }
 
 .otp-timer {
@@ -404,28 +405,35 @@ h1 {
 
 .otp-details {
   margin-top: 1.5rem;
-  text-align: left;
+  background-color: #111827;
+  border-radius: 0.5rem;
+  border: 1px solid #374151;
+  overflow: hidden;
 }
 
 .otp-detail-row {
+  padding: 0.75rem 1rem;
   display: flex;
   align-items: center;
-  margin-bottom: 0.75rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid #374151;
+  border-bottom: 1px solid #1f2937;
+}
+
+.otp-detail-row:last-child {
+  border-bottom: none;
 }
 
 .detail-label {
-  flex: 0 0 25%;
+  flex: 0 0 30%;
+  font-weight: 500;
   color: #9ca3af;
-  font-size: 0.9rem;
+  margin-right: 1rem;
 }
 
 .detail-value {
   flex: 1;
-  color: #f3f4f6;
-  font-family: monospace;
-  font-size: 0.95rem;
+  color: #e5e7eb;
+  font-family: "Roboto Mono", monospace, "Courier New", Courier;
+  font-size: 0.9rem;
   word-break: break-all;
 }
 
@@ -470,13 +478,46 @@ h1 {
 }
 
 /* Mobile responsiveness for OTP */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+  #root {
+    padding: 0.5rem;
+  }
+
+  .app-container {
+    padding: 0.5rem;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .result-container {
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+
   .otp-code {
-    font-size: 1.75rem;
+    font-size: 2rem;
+    letter-spacing: 0.1rem;
+  }
+
+  .otp-code-container {
+    padding: 0.75rem;
   }
 
   .detail-label {
     flex: 0 0 35%;
+  }
+
+  .otp-details {
+    padding: 0.5rem;
+  }
+
+  .otp-detail-row {
+    padding: 0.5rem;
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .secret-copy-button {
@@ -487,6 +528,36 @@ h1 {
 
   .secret-row {
     padding: 0.75rem;
+  }
+
+  .export-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .export-button {
+    width: 100%;
+  }
+
+  .scan-again-button {
+    font-size: 0.9rem;
+    padding: 0.6rem 1.2rem;
+    margin-top: 0.5rem;
+  }
+
+  .otp-selector {
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+
+  .account-list {
+    max-height: 200px;
+  }
+
+  .export-all-button {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
   }
 }
 
@@ -735,9 +806,51 @@ h1 {
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.3s;
-  margin-bottom: 1rem;
+  margin-top: 1rem;
+  width: auto;
+  max-width: 100%;
 }
 
 .scan-again-button:hover {
   background-color: #4338ca;
+}
+
+/* Enhanced mobile responsiveness */
+@media (max-width: 480px) {
+  .app-container {
+    padding: 0.25rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  .otp-code {
+    font-size: 1.75rem;
+    letter-spacing: 0.05rem;
+  }
+
+  .account-item {
+    padding: 0.75rem;
+  }
+
+  .account-issuer {
+    font-size: 0.9rem;
+  }
+
+  .account-name {
+    font-size: 0.8rem;
+  }
+
+  .result-container {
+    padding: 0.75rem;
+  }
+
+  .result-container h2 {
+    font-size: 1.1rem;
+  }
+
+  #reader {
+    height: 300px;
+  }
 }
