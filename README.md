@@ -61,6 +61,8 @@ On startup the app looks for `.json` files in the project's `data/` folder (any 
 - **One file**: it is loaded automatically.
 - **Several files**: a list with the file names is shown so you can pick one.
 
+The scanner view also lists the saved files, so you can reload one without scanning a QR code.
+
 Each file can contain a single account object or an array of accounts, using the same format produced by the JSON export. The folder is read when the app is built (or when the Vite dev server starts), so after adding or removing files, restart the dev server or rebuild the app.
 
 > ⚠️ JSON files in `data/` are embedded into the built assets. Do not publish a build that contains your real tokens.
@@ -115,6 +117,31 @@ yarn build
 # or
 bun build
 ```
+
+The compiled app is written to `dist/`. Its entry point is `dist/index.html`, but it must be served over HTTP (opening it directly with `file://` blocks ES modules and camera access). The launcher below handles that for you.
+
+### Windows: Build, Run and Create a Shortcut
+
+The project includes `start-app.cmd`, a single entry point that:
+
+1. Installs dependencies if `node_modules` is missing.
+2. Builds the app, embedding the JSON files from `data/`.
+3. Starts the compiled app on a local server and opens it in your default browser.
+
+Run it by double-clicking `start-app.cmd` or from a terminal:
+
+```bat
+start-app.cmd
+```
+
+Close the terminal window to stop the local server. Because it rebuilds every time, any new or updated file in `data/` is included automatically.
+
+To use the app from anywhere:
+
+1. Double-click `create-desktop-shortcut.cmd`; it creates a **Google Authenticator Exporter** shortcut on your Desktop.
+2. Or right-click `start-app.cmd` → **Create shortcut**, then move that shortcut wherever you want.
+
+> Keep `start-app.cmd` inside the project folder. The shortcut can be moved, but it always points back to the launcher.
 
 ## 📄 License
 

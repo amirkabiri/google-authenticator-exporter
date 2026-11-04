@@ -3,6 +3,7 @@ import "./App.css";
 import QrScanner from "./components/QrScanner";
 import ExportOTP from "./components/ExportOTP";
 import ExportNameModal from "./components/ExportNameModal";
+import DataFileList from "./components/DataFileList";
 import type { OTPInfo } from "./utils/otpUtils";
 import {
   parseOTPUri,
@@ -236,38 +237,34 @@ function App() {
       )}
 
       {mode === "selectFile" && (
-        <div className="otp-selector data-file-selector">
-          <h2>Select a Data File</h2>
-          <p className="data-file-hint">
-            Multiple JSON files were found in the data/ folder.
-          </p>
-          <div className="account-list">
-            {dataFiles.map((file) => (
-              <button
-                type="button"
-                key={file.path}
-                className="account-item data-file-item"
-                onClick={() => handleSelectDataFile(file)}
-              >
-                <span className="account-issuer">{file.name}</span>
-                <span className="account-name">
-                  {file.fileName} &middot; {file.accounts.length} account
-                  {file.accounts.length === 1 ? "" : "s"}
-                </span>
-              </button>
-            ))}
-          </div>
+        <>
+          <DataFileList
+            files={dataFiles}
+            title="Select a Data File"
+            hint="Multiple JSON files were found in the data/ folder."
+            onSelect={handleSelectDataFile}
+          />
           <button className="scan-again-button" onClick={handleScanAgain}>
             Scan a QR Code Instead
           </button>
-        </div>
+        </>
       )}
 
       {mode === "scanner" && (
-        <QrScanner
-          onScanSuccess={handleScanSuccess}
-          onScanError={handleScanError}
-        />
+        <>
+          <QrScanner
+            onScanSuccess={handleScanSuccess}
+            onScanError={handleScanError}
+          />
+          {dataFiles.length > 0 && (
+            <DataFileList
+              files={dataFiles}
+              title="Or Load a Saved JSON File"
+              hint="Load the accounts stored in the data/ folder without scanning a QR code."
+              onSelect={handleSelectDataFile}
+            />
+          )}
+        </>
       )}
 
       {mode === "loaded" && (
@@ -280,12 +277,19 @@ function App() {
           <button className="scan-again-button" onClick={handleScanAgain}>
             Scan Another QR Code
           </button>
-          {dataFiles.length > 1 && (
+          {(dataFiles.length > 1 ||
+            (dataFiles.length === 1 && loadedFileName === null)) && (
             <button
               className="scan-again-button secondary-button"
-              onClick={handleChooseAnotherFile}
+              onClick={() => {
+                if (dataFiles.length === 1) {
+                  handleSelectDataFile(dataFiles[0]);
+                } else {
+                  handleChooseAnotherFile();
+                }
+              }}
             >
-              Load Another JSON File
+              Load Saved JSON File
             </button>
           )}
         </div>
