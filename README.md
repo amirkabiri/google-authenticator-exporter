@@ -9,6 +9,7 @@ A powerful, user-friendly web application that allows you to scan, decode, and e
 ## ✨ Features
 
 - 📱 **Scan QR Codes**: Directly scan QR codes using your device's camera
+- 📂 **Auto-load from `data/`**: Loads saved JSON exports automatically on startup, without scanning a QR code
 - 🔄 **Migration Support**: Process Google Authenticator migration QR codes containing multiple accounts
 - 📊 **TOTP/HOTP Support**: Compatible with both Time-based (TOTP) and Counter-based (HOTP) one-time passwords
 - 📲 **Mobile Optimized**: Responsive design works great on both desktop and mobile devices
@@ -51,6 +52,20 @@ The Google Authenticator Exporter utilizes several technologies to provide a sea
 4. View your authentication details
 5. For TOTP accounts, watch the code refresh with the countdown timer
 6. Copy the code, secret, or export to your preferred format
+
+## 📂 Loading Accounts Without Scanning a QR Code
+
+On startup the app looks for `.json` files in the project's `data/` folder (any file name):
+
+- **No files**: the QR scanner is shown.
+- **One file**: it is loaded automatically.
+- **Several files**: a list with the file names is shown so you can pick one.
+
+Each file can contain a single account object or an array of accounts, using the same format produced by the JSON export. The folder is read when the app is built (or when the Vite dev server starts), so after adding or removing files, restart the dev server or rebuild the app.
+
+> ⚠️ JSON files in `data/` are embedded into the built assets. Do not publish a build that contains your real tokens.
+
+When you export JSON (a single account or all accounts), the app asks for the file name before downloading it. The `.json` extension is added automatically.
 
 ## 🔒 Privacy & Security
 

@@ -2,12 +2,18 @@ import { useState, useEffect, useCallback } from "react";
 import "./App.css";
 import QrScanner from "./components/QrScanner";
 import ExportOTP from "./components/ExportOTP";
+import ExportNameModal from "./components/ExportNameModal";
 import type { OTPInfo } from "./utils/otpUtils";
 import {
   parseOTPUri,
   generateTOTP,
   getRemainingSeconds,
 } from "./utils/otpUtils";
+import type { DataFile } from "./utils/dataFiles";
+import { loadDataFiles } from "./utils/dataFiles";
+import { downloadJson } from "./utils/downloadUtils";
+
+type AppMode = "loading" | "selectFile" | "scanner" | "loaded";
 
 function App() {
   const [scannedResult, setScannedResult] = useState<string | null>(null);
@@ -16,11 +22,56 @@ function App() {
   const [otpCode, setOtpCode] = useState<string | null>(null);
   const [remainingSeconds, setRemainingSeconds] = useState<number>(30);
   const [parseError, setParseError] = useState<string | null>(null);
-  const [scanning, setScanning] = useState<boolean>(true);
+  const [mode, setMode] = useState<AppMode>("loading");
+  const [dataFiles, setDataFiles] = useState<DataFile[]>([]);
+  const [loadedFileName, setLoadedFileName] = useState<string | null>(null);
+  const [showExportAllDialog, setShowExportAllDialog] = useState(false);
 
   // Get the currently selected OTP info
   const selectedOtpInfo =
     otpInfoList.length > 0 ? otpInfoList[selectedOtpIndex] : null;
+
+  // On startup, look for JSON files in the data/ folder
+  useEffect(() => {
+    let cancelled = false;
+
+    loadDataFiles()
+      .then((files) => {
+        if (cancelled) return;
+
+        setDataFiles(files);
+
+        if (files.length === 1) {
+          const [file] = files;
+
+          if (file.accounts.length > 0) {
+            setOtpInfoList(file.accounts);
+            setSelectedOtpIndex(0);
+            setLoadedFileName(file.fileName);
+            setMode("loaded");
+          } else {
+            setParseError(
+              `The file "${file.fileName}" does not contain any valid OTP accounts.`
+            );
+            setMode("scanner");
+          }
+          return;
+        }
+
+        setMode(files.length > 1 ? "selectFile" : "scanner");
+      })
+      .catch((error) => {
+        if (cancelled) return;
+
+        console.error("Error loading data files:", error);
+        setParseError("Failed to read the JSON files in the data folder.");
+        setMode("scanner");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Generate TOTP code and update timer
   useEffect(() => {
@@ -55,22 +106,16 @@ function App() {
   const handleScanSuccess = useCallback(async (decodedText: string) => {
     setScannedResult(decodedText);
     setParseError(null);
-    setScanning(false);
+    setLoadedFileName(null);
 
     // Try to parse as OTP URI
     try {
       const info = await parseOTPUri(decodedText);
 
       if (info) {
-        if (Array.isArray(info)) {
-          // We have multiple OTP entries (from migration QR)
-          setOtpInfoList(info);
-          setSelectedOtpIndex(0);
-        } else {
-          // Single OTP entry
-          setOtpInfoList([info]);
-          setSelectedOtpIndex(0);
-        }
+        // Migration QRs return multiple entries; standard QRs return one.
+        setOtpInfoList(Array.isArray(info) ? info : [info]);
+        setSelectedOtpIndex(0);
       } else {
         setOtpInfoList([]);
         setOtpCode(null);
@@ -83,6 +128,8 @@ function App() {
       setParseError(
         `Failed to parse QR code: ${error instanceof Error ? error.message : "Unknown error"}`
       );
+    } finally {
+      setMode("loaded");
     }
   }, []);
 
@@ -119,12 +166,55 @@ function App() {
   }, [scannedResult]);
 
   const handleScanAgain = useCallback(() => {
-    setScanning(true);
+    setMode("scanner");
     setScannedResult(null);
     setOtpInfoList([]);
     setOtpCode(null);
+    setSelectedOtpIndex(0);
     setParseError(null);
+    setLoadedFileName(null);
   }, []);
+
+  const handleSelectDataFile = useCallback((file: DataFile) => {
+    if (file.accounts.length === 0) {
+      setParseError(
+        `The file "${file.fileName}" does not contain any valid OTP accounts.`
+      );
+      return;
+    }
+
+    setParseError(null);
+    setScannedResult(null);
+    setOtpInfoList(file.accounts);
+    setSelectedOtpIndex(0);
+    setLoadedFileName(file.fileName);
+    setMode("loaded");
+  }, []);
+
+  const handleChooseAnotherFile = useCallback(() => {
+    setParseError(null);
+    setMode("selectFile");
+  }, []);
+
+  const handleExportAll = useCallback(
+    (fileName: string) => {
+      const jsonData = otpInfoList.map((info) => ({
+        type: info.type,
+        account: info.account,
+        issuer: info.issuer,
+        secret: info.secret,
+        algorithm: info.algorithm,
+        digits: info.digits,
+        period: info.period,
+        counter: info.counter,
+        uri: info.uri,
+      }));
+
+      downloadJson(jsonData, fileName);
+      setShowExportAllDialog(false);
+    },
+    [otpInfoList]
+  );
 
   const handleSelectOtp = useCallback(
     (index: number) => {
@@ -139,15 +229,66 @@ function App() {
     <div className="app-container">
       <h1>Google Authenticator Exporter</h1>
 
-      {scanning ? (
+      {mode === "loading" && (
+        <div className="loading-message">
+          Loading accounts from the data folder...
+        </div>
+      )}
+
+      {mode === "selectFile" && (
+        <div className="otp-selector data-file-selector">
+          <h2>Select a Data File</h2>
+          <p className="data-file-hint">
+            Multiple JSON files were found in the data/ folder.
+          </p>
+          <div className="account-list">
+            {dataFiles.map((file) => (
+              <button
+                type="button"
+                key={file.path}
+                className="account-item data-file-item"
+                onClick={() => handleSelectDataFile(file)}
+              >
+                <span className="account-issuer">{file.name}</span>
+                <span className="account-name">
+                  {file.fileName} &middot; {file.accounts.length} account
+                  {file.accounts.length === 1 ? "" : "s"}
+                </span>
+              </button>
+            ))}
+          </div>
+          <button className="scan-again-button" onClick={handleScanAgain}>
+            Scan a QR Code Instead
+          </button>
+        </div>
+      )}
+
+      {mode === "scanner" && (
         <QrScanner
           onScanSuccess={handleScanSuccess}
           onScanError={handleScanError}
         />
-      ) : (
-        <button className="scan-again-button" onClick={handleScanAgain}>
-          Scan Another QR Code
-        </button>
+      )}
+
+      {mode === "loaded" && (
+        <div className="session-actions">
+          {loadedFileName && (
+            <p className="data-file-source">
+              Loaded from <strong>data/{loadedFileName}</strong>
+            </p>
+          )}
+          <button className="scan-again-button" onClick={handleScanAgain}>
+            Scan Another QR Code
+          </button>
+          {dataFiles.length > 1 && (
+            <button
+              className="scan-again-button secondary-button"
+              onClick={handleChooseAnotherFile}
+            >
+              Load Another JSON File
+            </button>
+          )}
+        </div>
       )}
 
       {parseError && (
@@ -267,37 +408,17 @@ function App() {
         <div className="export-all-container">
           <button
             className="export-all-button"
-            onClick={() => {
-              const jsonData = otpInfoList.map((info) => ({
-                type: info.type,
-                account: info.account,
-                issuer: info.issuer,
-                secret: info.secret,
-                algorithm: info.algorithm,
-                digits: info.digits,
-                period: info.period,
-                counter: info.counter,
-                uri: info.uri,
-              }));
-
-              // Create JSON blob
-              const blob = new Blob([JSON.stringify(jsonData, null, 2)], {
-                type: "application/json",
-              });
-              const url = URL.createObjectURL(blob);
-
-              // Create download link
-              const link = document.createElement("a");
-              link.href = url;
-              link.download = "google-authenticator-export.json";
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-              URL.revokeObjectURL(url);
-            }}
+            onClick={() => setShowExportAllDialog(true)}
           >
             Export All Accounts as JSON
           </button>
+
+          <ExportNameModal
+            isOpen={showExportAllDialog}
+            defaultName="google-authenticator-export"
+            onConfirm={handleExportAll}
+            onCancel={() => setShowExportAllDialog(false)}
+          />
         </div>
       )}
 

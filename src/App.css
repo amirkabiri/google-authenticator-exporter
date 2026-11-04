@@ -854,3 +854,168 @@ h1 {
     height: 300px;
   }
 }
+
+/* Data file auto-loading */
+.loading-message {
+  margin: 2rem auto;
+  padding: 1rem 1.5rem;
+  max-width: 480px;
+  background-color: #1a1a2e;
+  border: 1px solid #2a2a5a;
+  border-radius: 0.5rem;
+  color: #e5e7eb;
+}
+
+.data-file-selector h2 {
+  margin-bottom: 0.5rem;
+}
+
+.data-file-hint {
+  color: #9ca3af;
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+}
+
+.data-file-item {
+  width: 100%;
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.data-file-item .account-name {
+  font-size: 0.8rem;
+}
+
+.data-file-source {
+  margin: 0;
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
+
+.data-file-source strong {
+  color: #a5b4fc;
+  font-family: "Roboto Mono", monospace, "Courier New", Courier;
+}
+
+.session-actions {
+  margin: 1.5rem 0 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.session-actions .scan-again-button {
+  margin-top: 0;
+}
+
+.secondary-button {
+  background-color: #374151;
+}
+
+.secondary-button:hover {
+  background-color: #4b5563;
+}
+
+/* Export file name dialog */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  box-sizing: border-box;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.export-name-dialog {
+  background-color: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 0.75rem;
+  padding: 1.75rem;
+  width: 100%;
+  max-width: 400px;
+  text-align: left;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.export-name-dialog h3 {
+  margin: 0 0 1.25rem;
+  color: #f9fafb;
+  font-size: 1.15rem;
+  text-align: center;
+}
+
+.export-name-dialog label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
+
+.export-name-dialog input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #4b5563;
+  background-color: #111827;
+  color: #f3f4f6;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.export-name-dialog input:focus {
+  outline: 2px solid #6366f1;
+  outline-offset: 1px;
+  border-color: #6366f1;
+}
+
+.export-name-hint {
+  margin: 0.5rem 0 1.5rem;
+  color: #6b7280;
+  font-size: 0.8rem;
+}
+
+.export-name-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.cancel-button {
+  background-color: #374151;
+  color: #e5e7eb;
+}
+
+.cancel-button:hover {
+  background-color: #4b5563;
+}
+
+.export-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .export-name-dialog {
+    padding: 1.25rem;
+  }
+
+  .export-name-actions {
+    flex-direction: column-reverse;
+  }
+
+  .export-name-actions .export-button {
+    width: 100%;
+  }
+}
+
