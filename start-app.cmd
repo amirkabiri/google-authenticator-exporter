@@ -20,13 +20,15 @@ if not exist "node_modules" (
   )
 )
 
-echo Compilando la aplicacion...
-echo Los archivos JSON de la carpeta data/ se incluiran en esta compilacion.
-call npm.cmd run build
-if errorlevel 1 (
-  echo [ERROR] La compilacion fallo. Revisa los mensajes anteriores.
-  pause
-  exit /b 1
+if not exist "dist" (
+  echo Compilando la aplicacion por primera vez...
+  echo Los archivos JSON de la carpeta data/ se incluiran en esta compilacion.
+  call npm.cmd run build
+  if errorlevel 1 (
+    echo [ERROR] La compilacion fallo. Revisa los mensajes anteriores.
+    pause
+    exit /b 1
+  )
 )
 
 echo.
