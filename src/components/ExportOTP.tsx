@@ -1,6 +1,8 @@
 import { useState } from "react";
 import QRCode from "qrcode";
 import type { OTPInfo } from "../utils/otpUtils";
+import { downloadJson } from "../utils/downloadUtils";
+import ExportNameModal from "./ExportNameModal";
 
 interface ExportOTPProps {
   otpInfo: OTPInfo;
@@ -9,8 +11,13 @@ interface ExportOTPProps {
 const ExportOTP: React.FC<ExportOTPProps> = ({ otpInfo }) => {
   const [showQrCode, setShowQrCode] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
+  const [showJsonDialog, setShowJsonDialog] = useState(false);
 
-  const exportAsJson = () => {
+  const defaultFileName = `${otpInfo.issuer || "unknown"}-${
+    otpInfo.account || "account"
+  }`;
+
+  const exportAsJson = (fileName: string) => {
     // Create a data object with the OTP information
     const data = {
       type: otpInfo.type,
@@ -24,33 +31,8 @@ const ExportOTP: React.FC<ExportOTPProps> = ({ otpInfo }) => {
       uri: otpInfo.uri,
     };
 
-    // Convert to JSON string
-    const jsonString = JSON.stringify(data, null, 2);
-
-    // Create a Blob with the JSON data
-    const blob = new Blob([jsonString], { type: "application/json" });
-
-    // Create a URL for the Blob
-    const url = URL.createObjectURL(blob);
-
-    // Create a link element
-    const link = document.createElement("a");
-
-    // Set link properties
-    link.href = url;
-    link.download = `${otpInfo.issuer || "unknown"}-${
-      otpInfo.account || "account"
-    }.json`;
-
-    // Append link to body
-    document.body.appendChild(link);
-
-    // Trigger download
-    link.click();
-
-    // Clean up
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    downloadJson(data, fileName);
+    setShowJsonDialog(false);
   };
 
   const generateQrCode = async () => {
@@ -103,13 +85,23 @@ const ExportOTP: React.FC<ExportOTPProps> = ({ otpInfo }) => {
   return (
     <>
       <div className="export-buttons">
-        <button className="export-button json-button" onClick={exportAsJson}>
+        <button
+          className="export-button json-button"
+          onClick={() => setShowJsonDialog(true)}
+        >
           Export as JSON
         </button>
         <button className="export-button qr-button" onClick={generateQrCode}>
           Generate QR Code
         </button>
       </div>
+
+      <ExportNameModal
+        isOpen={showJsonDialog}
+        defaultName={defaultFileName}
+        onConfirm={exportAsJson}
+        onCancel={() => setShowJsonDialog(false)}
+      />
 
       {showQrCode && qrCodeUrl && (
         <div className="qr-code-modal">
